@@ -10,6 +10,11 @@ numeric_columns <- names(data)[sapply(data, is.numeric)]
 numeric_columns
 numeric_data <- data %>% dplyr::select(numeric_columns)
 
+numeric_correlation_matrix <- cor(numeric_data)
+heatmap(numeric_correlation_matrix, 
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        symm = TRUE)
+
 network_structure <- bnlearn::hc(numeric_data)
 plot(network_structure)
 
