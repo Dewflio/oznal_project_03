@@ -2,6 +2,7 @@ library(magrittr)
 library(tidyverse)
 library(dplyr)
 library(bnlearn)
+library(bde)
 
 data <- read_csv("spotify_top_songs_audio_features.csv", col_names = TRUE, num_threads = 4)
 head(data)

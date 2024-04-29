@@ -1,0 +1,119 @@
+# OZNAL - Project 03 - Discrete Bayesian Networks
+
+## FIIT STU - Bratislava
+
+## May 2024
+
+## Authors
+
+-   Leonard Puškáč
+-   Ema Richnáková
+
+## Dataset
+
+In this mini-project we will analyse data from <https://www.kaggle.com/datasets/julianoorlandi/spotify-top-songs-and-audio-features?resource=download>
+
+The dataset contains information about various "top" songs and their stats on Spotify. There are 6513 entries each containing FILL IN features, such as the name of the song, its id, features that can be used to classify the songs such as the key or the mode (Major/Minor), as well as numeric features that can be used for regression analysis - energy, danceability, speechiness (the amount of spoken word), liveness, loudness, tempo and many others.
+
+### Data Description
+
+| Column name      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+|------------------------------------|------------------------------------|
+| id               | The Spotify ID for the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| artist_names     | The name of the artist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| track_name       | The name of the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| source           | The name of the record label.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| key              | The key the track is in.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| mode             | Mode indicates the modality (major or minor) of a track, the type of scale from which its melodic content is derived.                                                                                                                                                                                                                                                                                                                                                                                              |
+| time_signature   | An estimated time signature. The time signature (meter) is a notational convention to specify how many beats are in each bar (or measure). The time signature ranges from 3 to 7.                                                                                                                                                                                                                                                                                                                                  |
+| danceability     | Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.                                                                                                                                                                                                                                                                       |
+| energy           | Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.                                                                                                                          |
+| speechiness      | Speechiness detects the presence of spoken words in a track. The more exclusively speech-like the recording (e.g. talk show, audio book, poetry), the closer to 1.0 the attribute value. Values above 0.66 describe tracks that are probably made entirely of spoken words. Values between 0.33 and 0.66 describe tracks that may contain both music and speech, either in sections or layered, including such cases as rap music. Values below 0.33 most likely represent music and other non-speech-like tracks. |
+| acousticness     | A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.                                                                                                                                                                                                                                                                                                                                                                                       |
+| instrumentalness | Predicts whether a track contains no vocals. "Ooh" and "aah" sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly "vocal". The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.                                                                                                                 |
+| liveness         | Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.                                                                                                                                                                                                                                                                                            |
+| valence          | A measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).                                                                                                                                                                                                                                                                  |
+| loudness         | The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and are useful for comparing relative loudness of tracks. Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude). Values typically range between -60 and 0 db.                                                                                                                                                                                     |
+| tempo            | The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.                                                                                                                                                                                                                                                                                                                         |
+| duration_ms      | The duration of the track in milliseconds.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| weeks_on_chart   | Number of weeks the track was in the top 200 charts.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| streams          | How many streams the track had during its period in the charts.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+## Importing Libraries
+
+```{r message=FALSE}
+library(magrittr)
+library(tidyverse) # Pipe implementation for R
+library(data.table) # Implements %like%
+library(dplyr)
+library(bnlearn)
+library(bde)
+```
+
+## Loading the Dataset
+
+```{r}
+data <- read_csv("spotify_top_songs_audio_features.csv", col_names = TRUE, num_threads = 4)
+head(data)
+```
+
+## Data Exploration 
+
+First we create and select the discrete features of the data set, so that we can perform correlation analysis.
+
+```{r pressure, echo=FALSE, fig.cap="When we mutated key and created Bayessian network.", out.width = '70%'}
+knitr::include_graphics("./images/image.png")
+```
+
+```{r}
+mean_dance <- mean(data$danceability) ; print(paste("Danceability mean: ", mean_dance))
+mean_energy <- mean(data$energy) ; print(paste("Energy mean: ", mean_energy))
+mean_valence <- mean(data$valence) ; print(paste("Valence mean: ", mean_valence))
+mean_loud <- mean(data$loudness) ; print(paste("Loudness mean: ", mean_loud))
+mean_tempo <- mean(data$tempo) ; print(paste("Tempo mean: ", mean_tempo))
+
+heatmap(cor(data %>% select_if(is.numeric)),
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        symm = TRUE)
+
+table(data$key)
+table(data$mode)
+table(data$time_signature)
+
+discrete_data <- data %>%
+    mutate(mode = ifelse(mode == "Major", 1, 0)) %>%
+    mutate(time_signature = case_when(
+        time_signature %like% "1" ~ 1,
+        time_signature %like% "3 beats" ~ 3,
+        time_signature %like% "4 beats" ~ 4,
+        time_signature %like% "5 beats" ~ 5,
+        .default = 0
+    )) %>%
+    mutate(danceability = ifelse(danceability >= mean_dance, 1, 0)) %>%
+    mutate(energy = ifelse(energy >= mean_energy, 1, 0)) %>%
+    mutate(valence = ifelse(valence >= mean_valence, 1, 0)) %>%
+    mutate(loudness = ifelse(loudness >= mean_loud, 1, 0)) %>%
+    mutate(tempo = ifelse(tempo >= mean_tempo, 1, 0)) %>%
+    select(mode, time_signature, danceability, energy, valence, loudness, tempo)
+
+plot(discrete_data)
+
+network_structure <- bnlearn::hc(discrete_data)
+plot(network_structure)
+```
+
+následne treba zodpovedať minimálne 5 marketingovo predajných otázok.
+
+sformulujte ich pomocou matematického vyjadrenia (join probability, marginal probability, conditional probability).
+
+ - minimálne jednu join probability pre konkrétnu kombináciu dát napr. P(A=a+, B=b-, C=c+, D=d-,…) 
+ - minimálne jednu marginálnu pravdepodobnosť napr. P(A,B,E) ak …C=c+ a D=d-
+ - minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+| B=b+,C=c-)
+ 
+ minimalne 2 odpovede na otazky (z toho aspoň jednu podmienenú)
+ - ak sa rozhodnete použiť niektorú z knižníc na výpočet pravdepodobností na sieti (nemusíte), tak formálne úpravy treba realizovať ručne a až numerický výsledok je možné zveriť knižnici
+ 
+ Súčasťou projektu je výpis skriptu realizujúceho výpočet.
+
+
+<!--bde_score <- bde(network_structure, numeric_data)
