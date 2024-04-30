@@ -11,9 +11,10 @@
 
 ## Dataset
 
-In this mini-project we will analyse data from <https://www.kaggle.com/datasets/julianoorlandi/spotify-top-songs-and-audio-features?resource=download>
+In this mini-project we will analyse data from <https://www.kaggle.com/datasets/julianoorlandi/spotify-top-songs-and-audio-features?resource=download>.
 
-The dataset contains information about various "top" songs and their stats on Spotify. There are 6513 entries each containing FILL IN features, such as the name of the song, its id, features that can be used to classify the songs such as the key or the mode (Major/Minor), as well as numeric features that can be used for regression analysis - energy, danceability, speechiness (the amount of spoken word), liveness, loudness, tempo and many others.
+The dataset contains information about various "top" songs and their stats on Spotify.
+There are 6513 entries each containing FILL IN features, such as the name of the song, its id, features that can be used to classify the songs such as the key or the mode (Major/Minor), as well as numeric features that can be used for regression analysis - energy, danceability, speechiness (the amount of spoken word), liveness, loudness, tempo and many others.
 
 ### Data Description
 
@@ -52,35 +53,34 @@ library(bde)
 
 ## Loading the Dataset
 
-```{r}
+```{r message=FALSE}
 data <- read_csv("spotify_top_songs_audio_features.csv", col_names = TRUE, num_threads = 4)
 head(data)
 ```
 
-## Data Exploration 
+## Data Exploration
 
-First we create and select the discrete features of the data set, so that we can perform correlation analysis.
+We transform non-numeric features and conduct correlation analysis on the transformed data.
 
-```{r pressure, echo=FALSE, fig.cap="When we mutated key and created Bayessian network.", out.width = '70%'}
-knitr::include_graphics("./images/image.png")
-```
+Following that, we select 7 suitable features.
+We convert continuous values into discrete (using $0/1$ classification divided by $mean$) and use them to build a discrete Bayesian network.
 
 ```{r}
-mean_dance <- mean(data$danceability) ; print(paste("Danceability mean: ", mean_dance))
-mean_energy <- mean(data$energy) ; print(paste("Energy mean: ", mean_energy))
-mean_valence <- mean(data$valence) ; print(paste("Valence mean: ", mean_valence))
-mean_loud <- mean(data$loudness) ; print(paste("Loudness mean: ", mean_loud))
-mean_tempo <- mean(data$tempo) ; print(paste("Tempo mean: ", mean_tempo))
-
-heatmap(cor(data %>% select_if(is.numeric)),
-        col = colorRampPalette(c("blue", "white", "red"))(100),
-        symm = TRUE)
-
 table(data$key)
 table(data$mode)
 table(data$time_signature)
 
-discrete_data <- data %>%
+numeric_data <- data %>%
+    mutate(key = case_when(
+        key %like% "A|A#/Bb" ~ 1,
+        key %like% "B" ~ 2,
+        key %like% "C|C#/Db" ~ 3,
+        key %like% "D|D#/Eb" ~ 4,
+        key %like% "E" ~ 5,
+        key %like% "F|F#/Gb" ~ 6,
+        key %like% "G|G#/Ab" ~ 7,
+        .default = 0
+    )) %>%
     mutate(mode = ifelse(mode == "Major", 1, 0)) %>%
     mutate(time_signature = case_when(
         time_signature %like% "1" ~ 1,
@@ -89,15 +89,32 @@ discrete_data <- data %>%
         time_signature %like% "5 beats" ~ 5,
         .default = 0
     )) %>%
+    select_if(is.numeric)
+
+heatmap(cor(numeric_data),
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        symm = TRUE)
+
+mean_dance <- mean(data$danceability) ; print(paste("Danceability mean: ", mean_dance))
+mean_energy <- mean(data$energy) ; print(paste("Energy mean: ", mean_energy))
+mean_valence <- mean(data$valence) ; print(paste("Valence mean: ", mean_valence))
+mean_loud <- mean(data$loudness) ; print(paste("Loudness mean: ", mean_loud))
+mean_tempo <- mean(data$tempo) ; print(paste("Tempo mean: ", mean_tempo))
+
+discrete_data <- numeric_data %>%
     mutate(danceability = ifelse(danceability >= mean_dance, 1, 0)) %>%
     mutate(energy = ifelse(energy >= mean_energy, 1, 0)) %>%
     mutate(valence = ifelse(valence >= mean_valence, 1, 0)) %>%
     mutate(loudness = ifelse(loudness >= mean_loud, 1, 0)) %>%
     mutate(tempo = ifelse(tempo >= mean_tempo, 1, 0)) %>%
     select(mode, time_signature, danceability, energy, valence, loudness, tempo)
+```
 
-plot(discrete_data)
+```{r pressure, echo=FALSE, fig.cap="An example of utilizing a non-correlated feature such as 'key' in a Bayesian network., out.width = '50%'}
+knitr::include_graphics("./images/image.png")
+```
 
+```{r}
 network_structure <- bnlearn::hc(discrete_data)
 plot(network_structure)
 ```
