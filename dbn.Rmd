@@ -82,13 +82,7 @@ numeric_data <- data %>%
         .default = 0
     )) %>%
     mutate(mode = ifelse(mode == "Major", 1, 0)) %>%
-    mutate(time_signature = case_when(
-        time_signature %like% "1" ~ 1,
-        time_signature %like% "3 beats" ~ 3,
-        time_signature %like% "4 beats" ~ 4,
-        time_signature %like% "5 beats" ~ 5,
-        .default = 0
-    )) %>%
+    mutate(time_signature = ifelse(time_signature == "4 beats", 1, 0)) %>%
     select_if(is.numeric)
 
 heatmap(cor(numeric_data),
@@ -125,40 +119,46 @@ plot(network_structure)
 
 ### States
 
-| $D$   |                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|-----------------------------|
-| $D^+$ | Song is highly danceable.   |
-| $D^-$ | Song is not very danceable. |
+```{r}
+ratio_of <- function(value, feature) {
+    sum(feature == value) / length(feature)
+}
+```
 
-| $E$   |                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|-----------------------------|
-| $E^+$ | Song is very energetic.     |
-| $E^-$ | Song is not very energetic. |
+| $D$   |                             | $P(D)$                                      |                                                                                                                                                                                                                                                                                                                                                                                                            |
+|-------|-----------------------------|---------------------------------------------|
+| $D^+$ | Song is highly danceable.   | `r ratio_of(1, discrete_data$danceability)` |
+| $D^-$ | Song is not very danceable. | `r ratio_of(1, discrete_data$danceability)` |
 
-| $L$   |                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|-----------------|
-| $L^+$ | Song is louder. |
-| $L^-$ | Song is soft.   |
+| $E$   |                             | $P(E)$                                |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|-------|-----------------------------|---------------------------------------|
+| $E^+$ | Song is very energetic.     | `r ratio_of(1, discrete_data$energy)` |
+| $E^-$ | Song is not very energetic. | `r ratio_of(0, discrete_data$energy)` |
 
-| $V$   |                |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|----------------|
-| $V^+$ | Song is happy. |
-| $V^-$ | Song is sad.   |
+| $L$   |                 | $P(L)$                                  |                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|-------|-----------------|-----------------------------------------|
+| $L^+$ | Song is louder. | `r ratio_of(1, discrete_data$loudness)` |
+| $L^-$ | Song is soft.   | `r ratio_of(0, discrete_data$loudness)` |
 
-| $M$   |                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|------------------------|
-| $M^+$ | Song is in major mode. |
-| $M^-$ | Song is in minor mode. |
+| $V$   |                | $P(V)$                                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|-------|----------------|----------------------------------------|
+| $V^+$ | Song is happy. | `r ratio_of(1, discrete_data$valence)` |
+| $V^-$ | Song is sad.   | `r ratio_of(0, discrete_data$valence)` |
 
-| $TS$   |                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|--------|--------------------------|
-| $TS^+$ | Song has 4 beats.        |
-| $TS^-$ | Song has 1,3 or 5 beats. |
+| $M$   |                        | $P(M)$                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|-------|------------------------|-------------------------------------|
+| $M^+$ | Song is in major mode. | `r ratio_of(1, discrete_data$mode)` | 
+| $M^-$ | Song is in minor mode. | `r ratio_of(0, discrete_data$mode)` |
 
-| $T$   |               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-------|---------------|
-| $T^+$ | Song is fast. |
-| $T^-$ | Song is slow. |
+| $TS$   |                          | $P(TS)$                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|--------|--------------------------|-----------------------------------------------|
+| $TS^+$ | Song has 4 beats.        | `r ratio_of(1, discrete_data$time_signature)` | 
+| $TS^-$ | Song has 1,3 or 5 beats. | `r ratio_of(0, discrete_data$time_signature)` |
+
+| $T$   |               | $P(T)$                               |                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|-------|---------------|--------------------------------------|
+| $T^+$ | Song is fast. | `r ratio_of(1, discrete_data$tempo)` |
+| $T^-$ | Song is slow. | `r ratio_of(0, discrete_data$tempo)` |
 
 ## Questions
 
