@@ -108,9 +108,9 @@ discrete_data <- numeric_data %>%
 
 ## Discrete Bayesian Network
 
-```{r pressure, echo=FALSE, fig.cap="An example of utilizing a non-correlated feature such as 'key' in a Bayesian network.", out.width = '50%'}
-knitr::include_graphics("./images/image.png")
-```
+| ![](./images/bn_with_key.png){width="50%"} |
+|:---:|
+| *An example of utilizing a non-correlated feature such as 'key' in a Bayesian network.* |
 
 ```{r}
 network_structure <- bnlearn::hc(discrete_data)
@@ -120,61 +120,104 @@ plot(network_structure)
 ### States
 
 ```{r}
-ratio_of <- function(value, feature) {
-    sum(feature == value) / length(feature)
+
+
+
+
+ratio_of <- function(values, features) {
+    num_values <- length(values)
+    num_features <- length(features)
+
+    if (num_values != num_features) {
+        stop("The number of values must match the number of features.")
+    }
+
+    condition <- paste0(sapply(seq_len(num_values), function(i) paste0("features[[", i, "]] == values[", i, "]")), collapse = " & ")
+    
+    sum(eval(parse(text = condition))) / length(features[[1]])
 }
 ```
 
-| $D$   |                             | $P(D)$                                      |                                                                                                                                                                                                                                                                                                                                                                                                            |
-|-------|-----------------------------|---------------------------------------------|
-| $D^+$ | Song is highly danceable.   | `r ratio_of(1, discrete_data$danceability)` |
-| $D^-$ | Song is not very danceable. | `r ratio_of(1, discrete_data$danceability)` |
+|        |                             |                                                         |
+|:------:|:---------------------------:|:-------------------------------------------------------:|
+| $D$    |                             | $P(D)$                                                  |
+| $d^+$  | Song is highly danceable.   | `r ratio_of(c(1), list(f1=discrete_data$danceability))` | 
+| $d^-$  | Song is not very danceable. | `r ratio_of(c(0), list(f1=discrete_data$danceability))` |
+|        |                             |                                                         |
+| $E$    |                             | $P(E)$                                                  |   
+| $e^+$  | Song is very energetic.     | `r ratio_of(c(1), list(discrete_data$energy))`          |
+| $e^-$  | Song is not very energetic. | `r ratio_of(c(0), list(discrete_data$energy))`          |
+|        |                             |                                                         |
+| $L$    |                             | $P(L)$                                                  |
+| $l^+$  | Song is louder.             | `r ratio_of(c(1), list(discrete_data$loudness))`        |
+| $l^-$  | Song is soft.               | `r ratio_of(c(0), list(discrete_data$loudness))`        |
+|        |                             |                                                         |
+| $V$    |                             | $P(V)$                                                  |
+| $v^+$  | Song is happy.              | `r ratio_of(c(1), list(discrete_data$valence))`         |
+| $v^-$  | Song is sad.                | `r ratio_of(c(0), list(discrete_data$valence))`         |
+|        |                             |                                                         |
+| $M$    |                             | $P(M)$                                                  |
+| $m^+$  | Song is in major mode.      | `r ratio_of(c(1), list(discrete_data$mode))`            | 
+| $m^-$  | Song is in minor mode.      | `r ratio_of(c(0), list(discrete_data$mode))`            |
+|        |                             |                                                         |
+| $TS$   |                             | $P(TS)$                                                 |
+| $ts^+$ | Song has 4 beats.           | `r ratio_of(c(1), list(discrete_data$time_signature))`  | 
+| $ts^-$ | Song has 1,3 or 5 beats.    | `r ratio_of(c(0), list(discrete_data$time_signature))`  |
+|        |                             |                                                         |
+| $T$    |                             | $P(T)$                                                  |
+| $t^+$  | Song is fast.               | `r ratio_of(c(1), list(discrete_data$tempo))`           |
+| $t^-$  | Song is slow.               | `r ratio_of(c(0), list(discrete_data$tempo))`           |
 
-| $E$   |                             | $P(E)$                                |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|-------|-----------------------------|---------------------------------------|
-| $E^+$ | Song is very energetic.     | `r ratio_of(1, discrete_data$energy)` |
-| $E^-$ | Song is not very energetic. | `r ratio_of(0, discrete_data$energy)` |
+### Questions
 
-| $L$   |                 | $P(L)$                                  |                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|-------|-----------------|-----------------------------------------|
-| $L^+$ | Song is louder. | `r ratio_of(1, discrete_data$loudness)` |
-| $L^-$ | Song is soft.   | `r ratio_of(0, discrete_data$loudness)` |
+#### 1. What is the likelihood that a song has 4 beats, is in major mode, is very energetic, is louder, and is happy, all at the same time?
 
-| $V$   |                | $P(V)$                                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|-------|----------------|----------------------------------------|
-| $V^+$ | Song is happy. | `r ratio_of(1, discrete_data$valence)` |
-| $V^-$ | Song is sad.   | `r ratio_of(0, discrete_data$valence)` |
+$P(TS,M,E,L,V)$ (join probability)
 
-| $M$   |                        | $P(M)$                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-|-------|------------------------|-------------------------------------|
-| $M^+$ | Song is in major mode. | `r ratio_of(1, discrete_data$mode)` | 
-| $M^-$ | Song is in minor mode. | `r ratio_of(0, discrete_data$mode)` |
+![](./images/q1.png){width="30%"}
 
-| $TS$   |                          | $P(TS)$                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-|--------|--------------------------|-----------------------------------------------|
-| $TS^+$ | Song has 4 beats.        | `r ratio_of(1, discrete_data$time_signature)` | 
-| $TS^-$ | Song has 1,3 or 5 beats. | `r ratio_of(0, discrete_data$time_signature)` |
+##### Answer
 
-| $T$   |               | $P(T)$                               |                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-|-------|---------------|--------------------------------------|
-| $T^+$ | Song is fast. | `r ratio_of(1, discrete_data$tempo)` |
-| $T^-$ | Song is slow. | `r ratio_of(0, discrete_data$tempo)` |
+(**Child-Parent**)
 
-## Questions
+$P(TS=ts^+,M=m^+,E=e^+,L=l^+,V=v^+) =$
+$= P(TS=ts^+) * P(M=m^+) * P(E=e^+|M=m^+,TS=ts^+) * P(L=l^+|E=e^+) * P(V=v^+|E=e^+)$
+$= 0.9299862 * 0.5753109 * ? * ? * ?$
 
-1. ??
-2. ??
-3. ??
-4. ??
-5. ??
+a) $P(E=e^+|M=m^+,TS=ts^+)$ ...
+
+#### 2. What is the likelihood that a song has 4 beats and is fast?
+
+$P(TS,T)$ (marginal probability)
+
+$P(TS=ts^+,T=t^+)$
+
+#### 3. If we know that a song is highly danceable and very energetic, what is the likelihood that it is happy?
+
+$P(V|D,E)$ (conditional probability)
+
+$P(V=v^+|D=d^+,E=e^+)$
+
+#### 4. If we know that a song has 4 beats and is fast, what is the likelihood that it is highly danceable?
+
+$P(D|TS,T)$ (conditional probability)
+
+$P(D=d^+|TS=ts^+,T=t^+)$
+
+#### 5. ...
+
+$P(???)$ (? probability)
+
+
+![](./images/bn_example_p11.png){width="50%"}
 
 +sformulujte ich pomocou matematického vyjadrenia (join probability, marginal probability, conditional probability).
 
  - minimálne jednu join probability pre konkrétnu kombináciu dát napr. P(A=a+, B=b-, C=c+, D=d-,…) 
  - minimálne jednu marginálnu pravdepodobnosť napr. P(A,B,E) ak …C=c+ a D=d-
- - minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+| B=b+,C=c-)
- 
-## Answers
+ - minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+| B=b+,C=c-)
+
+### Answers
 
  minimalne 2 odpovede na otazky (z toho aspoň jednu podmienenú)
  - ak sa rozhodnete použiť niektorú z knižníc na výpočet pravdepodobností na sieti (nemusíte), tak formálne úpravy treba realizovať ručne a až numerický výsledok je možné zveriť knižnici
