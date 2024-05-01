@@ -176,15 +176,26 @@ $P(TS,M,E,L,V)$ (join probability)
 
 ![](./images/q1.png){width="30%"}
 
-##### Answer
-
-(**Child-Parent**)
+(*Child-Parent*)
 
 $P(TS=ts^+,M=m^+,E=e^+,L=l^+,V=v^+) =$
 $= P(TS=ts^+) * P(M=m^+) * P(E=e^+|M=m^+,TS=ts^+) * P(L=l^+|E=e^+) * P(V=v^+|E=e^+)$
-$= 0.9299862 * 0.5753109 * ? * ? * ?$
+$= 0.9299862 * 0.5753109 * 0,1533858 * 0,3012959 * 0,2649922$
+$= 0,0065523$
 
-a) $P(E=e^+|M=m^+,TS=ts^+)$ ...
+a) $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 0.2866575 * 0.5350837 = 0,1533858$
+
+    | E     | M     | TS     | $P(E=e^+,M=m^+,TS=ts^+)$                                                                           |
+    |:-----:|:-----:|:------:|:--------------------------------------------------------------------------------------------------:|
+    | $e^+$ | $m^+$ | $ts^+$ | `r ratio_of(c(1,1,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
+
+    | M     | TS     | $P(M=m^+,TS=ts^+)$                                                          |
+    |:-----:|:------:|:---------------------------------------------------------------------------:|
+    | $m^+$ | $ts^+$ | `r ratio_of(c(1,1), list(discrete_data$mode,discrete_data$time_signature))` |
+
+b) $P(L=l^+|E=e^+) = \frac{P(L=l^+)}{P(E=e^+)} = \frac{0.561953}{0.5361585} = 0,3012959$
+
+c) $P(V=v^+|E=e^+) = \frac{P(V=v^+)}{P(E=e^+)} = \frac{0.4942423}{0.5361585} = 0,2649922$
 
 #### 2. What is the likelihood that a song has 4 beats and is fast?
 
@@ -208,6 +219,9 @@ $P(D=d^+|TS=ts^+,T=t^+)$
 
 $P(???)$ (? probability)
 
+$P(???)$ 
+
+---
 
 ![](./images/bn_example_p11.png){width="50%"}
 
@@ -216,8 +230,6 @@ $P(???)$ (? probability)
  - minimálne jednu join probability pre konkrétnu kombináciu dát napr. P(A=a+, B=b-, C=c+, D=d-,…) 
  - minimálne jednu marginálnu pravdepodobnosť napr. P(A,B,E) ak …C=c+ a D=d-
  - minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+| B=b+,C=c-)
-
-### Answers
 
  minimalne 2 odpovede na otazky (z toho aspoň jednu podmienenú)
  - ak sa rozhodnete použiť niektorú z knižníc na výpočet pravdepodobností na sieti (nemusíte), tak formálne úpravy treba realizovať ručne a až numerický výsledok je možné zveriť knižnici
