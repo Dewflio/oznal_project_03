@@ -121,17 +121,10 @@ plot(network_structure)
 As we can see, we used the bnlearn library to help us with the network construction. The library gave us useful pointers to see which variable depends upon which other variables. Here's how we can interpret it:
 
 -   The tempo of the song dictates how danceable the song is (danceability)
-
-<!-- -->
-
 -   The mode of the song (major or minor) also inflences the danceability, but also determines the energy the song has.
-
 -   The time-signature influences a lot of things - how danceable, lound and energetic the song is
-
 -   The danceability of the song is a good predictor of the valance of the song
-
 -   The overall energy of the song determines the valance and how loud it is
-
 -   And finally the valance (or in other words how lively the song is) dictates how loud it is.
 
 We concluded that the structure of the network does make simple logical sense, so we opted to use it further and, with it, answer the questions we constructed in the next steps.
@@ -285,7 +278,7 @@ $P(D|TS,T)$ (conditional probability)
 
 $P(D=d^+|TS=ts^+,T=t^+) = \frac{P(D=d^+,TS=ts^+,T=t^+)}{P(TS=ts^+,T=t^+)} = \frac{0.2335329}{0.4363581} = 0.5351863$
 
-|   D   |   TS   |   T   |                                                $P(V,D,E)$                                                 |
+|   D   |   TS   |   T   |                                                $P(D,TS,T)$                                                |
 |:-------------:|:-------------:|:-------------:|:---------------------------:|
 | $d^+$ | $ts^+$ | $t^+$ | `r ratio_of(c(1,1,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 | $d^+$ | $ts^+$ | $t^-$ | `r ratio_of(c(1,1,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
@@ -296,7 +289,7 @@ $P(D=d^+|TS=ts^+,T=t^+) = \frac{P(D=d^+,TS=ts^+,T=t^+)}{P(TS=ts^+,T=t^+)} = \fra
 | $d^-$ | $ts^-$ | $t^+$ | `r ratio_of(c(0,0,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 | $d^-$ | $ts^-$ | $t^-$ | `r ratio_of(c(0,0,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 
-|   TS   |   T   |                                   $P(D,E)$                                   |
+|   TS   |   T   |                                  $P(TS,T)$                                   |
 |:---------------:|:---------------:|:-------------------------------------:|
 | $ts^+$ | $t^+$ | `r ratio_of(c(1,1), list(discrete_data$time_signature,discrete_data$tempo))` |
 | $ts^+$ | $t^-$ | `r ratio_of(c(1,0), list(discrete_data$time_signature,discrete_data$tempo))` |
