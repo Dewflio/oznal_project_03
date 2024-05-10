@@ -138,7 +138,7 @@ We concluded that the structure of the network does make simple logical sense, s
 
 ### States
 
-Our function `ratio_of` builds condition, which matches 1 value with 1 feature on same position. Number of expressions in condition is equivalent to number of values/features. This condition evaluates in `sum` function, which gives us number of rows which satisfies constructed condition. This sum is divided by total number of rows in dataset, which gives as ratio of matched rows to all rows. Essentially, it gives us propability of occurence for matched rows in dataset.
+Our function `ratio_of` builds condition, which matches 1 value with 1 feature on same position. The number of expressions in the condition is equivalent to the number of values/features. This condition evaluates in the `sum` function, which gives us the number of rows which satisfies the constructed condition. This sum is divided by the total number of rows in the dataset, which gives us the ratio of the matched rows to the total number of rows. Essentially, it gives us the probability of occurence for matched rows in the dataset.
 
 ```{r}
 ratio_of <- function(values, features) {
@@ -305,7 +305,11 @@ $P(D=d^+|TS=ts^+,T=t^+) = \frac{P(D=d^+,TS=ts^+,T=t^+)}{P(TS=ts^+,T=t^+)} = \fra
 
 #### 5. What is the probability that the song has high loudness while it has low energy and is in major mode?
 
-$P(L=l^+|E=e^-,M=m^+)$
+$P(L=l^+|E=e^-,M=m^+)$ (conditional probability)
+
+This conditional question deals with two variables that we know the state of, and one of them influences the other (specifically, there is a causal relationship between mode and energy, where the energy is influenced by the mode - we can see this in the network - there is a directed edge from mode to energy). Then there is a directed edge from energy to loudness. We are interested in knowing what the state of loudness would be given that mode is in one state and energy is as well.
+
+We can then see, that based on the formula resulting from the BN, that we can entirely remove the dependence of loudness from the mode. We can see that here:
 
 $P(L=l^+|E=e^-,M=m^+) = \frac{P(M=m^+).P(E=e^-|M=m^+).P(L=l^+|E=e^-)}{P(M=m^+).P(E=e^-|M=m^+)} = \frac{$P(L=l^+|E=e^-)}{1} = \frac{P(L=l^+,E=e^-)}{P(E=e^-)} = \frac{0.1325042}{0.4638415} = 0.2856669$
 
