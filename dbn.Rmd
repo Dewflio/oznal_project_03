@@ -13,13 +13,12 @@
 
 In this mini-project we will analyse data from <https://www.kaggle.com/datasets/julianoorlandi/spotify-top-songs-and-audio-features?resource=download>.
 
-The dataset contains information about various "top" songs and their stats on Spotify.
-There are 6513 entries each containing FILL IN features, such as the name of the song, its id, features that can be used to classify the songs such as the key or the mode (Major/Minor), as well as numeric features that can be used for regression analysis - energy, danceability, speechiness (the amount of spoken word), liveness, loudness, tempo and many others.
+The dataset contains information about various "top" songs and their stats on Spotify. There are 6513 entries each containing FILL IN features, such as the name of the song, its id, features that can be used to classify the songs such as the key or the mode (Major/Minor), as well as numeric features that can be used for regression analysis - energy, danceability, speechiness (the amount of spoken word), liveness, loudness, tempo and many others.
 
 ### Data Description
 
 | Column name      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-|------------------|------------------------------------|
+|------------------------|-----------------------------------------------|
 | id               | The Spotify ID for the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | artist_names     | The name of the artist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | track_name       | The name of the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -60,8 +59,7 @@ head(data)
 
 We transform non-numeric features and conduct correlation analysis on the transformed data.
 
-Following that, we select 7 suitable features.
-We convert continuous values into discrete (using $0/1$ classification divided by $mean$) and use them to build a discrete Bayesian network.
+Following that, we select 7 suitable features. We convert continuous values into discrete (using $0/1$ classification divided by $mean$) and use them to build a discrete Bayesian network.
 
 ```{r}
 table(data$key)
@@ -109,21 +107,39 @@ network_structure <- bnlearn::hc(discrete_data)
 plot(network_structure)
 ```
 
-| ![](./images/bn_with_key.png){width="50%"}                                              |
-|:--------------------------------------------------------------------------------:|
+|                                                                                  |
+|:----------------------------------------------------------------------:|
 | *Example of utilizing non-correlated feature such as 'key' in Bayesian network.* |
 
-###  STORY treba, ktora vysvetli tu siet
+```{r}
+network_structure <- bnlearn::hc(discrete_data)
+plot(network_structure)
+```
 
-TODO
+### The Story - Our interpretation of the Discrete Bayesian Network
+
+As we can see, we used the bnlearn library to help us with the network construction. The library gave us useful pointers to see which variable depends upon which other variables. Here's how we can interpret it:
+
+-   The tempo of the song dictates how danceable the song is (danceability)
+
+```{=html}
+<!-- -->
+```
+-   The mode of the song (major or minor) also inflences the danceability, but also determines the energy the song has.
+
+-   The time-signature influences a lot of things - how danceable, lound and energetic the song is
+
+-   The danceability of the song is a good predictor of the valance of the song
+
+-   The overall energy of the song determines the valance and how loud it is
+
+-   And finally the valance (or in other words how lively the song is) dictates how loud it is.
+
+We concluded that the structure of the network does make simple logical sense, so we opted to use it further and, with it, answer the questions we constructed in the next steps.
 
 ### States
 
-Our function `ratio_of` builds condition, which matches 1 value with 1 feature on same position.
-Number of expressions in condition is equivalent to number of values/features.
-This condition evaluates in `sum` function, which gives us number of rows which satisfies constructed condition.
-This sum is divided by total number of rows in dataset, which gives as ratio of matched rows to all rows.
-Essentially, it gives us propability of occurence for matched rows in dataset.
+Our function `ratio_of` builds condition, which matches 1 value with 1 feature on same position. Number of expressions in condition is equivalent to number of values/features. This condition evaluates in `sum` function, which gives us number of rows which satisfies constructed condition. This sum is divided by total number of rows in dataset, which gives as ratio of matched rows to all rows. Essentially, it gives us propability of occurence for matched rows in dataset.
 
 ```{r}
 ratio_of <- function(values, features) {
@@ -141,34 +157,34 @@ ratio_of <- function(values, features) {
 ```
 
 |        |                             |                                                         |
-|:------:|:---------------------------:|:-------------------------------------------------------:|
-| $D$    |                             | $P(D)$                                                  |
-| $d^+$  | Song is highly danceable.   | `r ratio_of(c(1), list(f1=discrete_data$danceability))` | 
+|:-------------:|:-----------------:|:-------------------------------------:|
+|  $D$   |                             |                         $P(D)$                          |
+| $d^+$  |  Song is highly danceable.  | `r ratio_of(c(1), list(f1=discrete_data$danceability))` |
 | $d^-$  | Song is not very danceable. | `r ratio_of(c(0), list(f1=discrete_data$danceability))` |
 |        |                             |                                                         |
-| $E$    |                             | $P(E)$                                                  |   
-| $e^+$  | Song is very energetic.     | `r ratio_of(c(1), list(discrete_data$energy))`          |
-| $e^-$  | Song is not very energetic. | `r ratio_of(c(0), list(discrete_data$energy))`          |
+|  $E$   |                             |                         $P(E)$                          |
+| $e^+$  |   Song is very energetic.   |     `r ratio_of(c(1), list(discrete_data$energy))`      |
+| $e^-$  | Song is not very energetic. |     `r ratio_of(c(0), list(discrete_data$energy))`      |
 |        |                             |                                                         |
-| $L$    |                             | $P(L)$                                                  |
-| $l^+$  | Song is louder.             | `r ratio_of(c(1), list(discrete_data$loudness))`        |
-| $l^-$  | Song is soft.               | `r ratio_of(c(0), list(discrete_data$loudness))`        |
+|  $L$   |                             |                         $P(L)$                          |
+| $l^+$  |       Song is louder.       |    `r ratio_of(c(1), list(discrete_data$loudness))`     |
+| $l^-$  |        Song is soft.        |    `r ratio_of(c(0), list(discrete_data$loudness))`     |
 |        |                             |                                                         |
-| $V$    |                             | $P(V)$                                                  |
-| $v^+$  | Song is happy.              | `r ratio_of(c(1), list(discrete_data$valence))`         |
-| $v^-$  | Song is sad.                | `r ratio_of(c(0), list(discrete_data$valence))`         |
+|  $V$   |                             |                         $P(V)$                          |
+| $v^+$  |       Song is happy.        |     `r ratio_of(c(1), list(discrete_data$valence))`     |
+| $v^-$  |        Song is sad.         |     `r ratio_of(c(0), list(discrete_data$valence))`     |
 |        |                             |                                                         |
-| $M$    |                             | $P(M)$                                                  |
-| $m^+$  | Song is in major mode.      | `r ratio_of(c(1), list(discrete_data$mode))`            | 
-| $m^-$  | Song is in minor mode.      | `r ratio_of(c(0), list(discrete_data$mode))`            |
+|  $M$   |                             |                         $P(M)$                          |
+| $m^+$  |   Song is in major mode.    |      `r ratio_of(c(1), list(discrete_data$mode))`       |
+| $m^-$  |   Song is in minor mode.    |      `r ratio_of(c(0), list(discrete_data$mode))`       |
 |        |                             |                                                         |
-| $TS$   |                             | $P(TS)$                                                 |
-| $ts^+$ | Song has 4 beats.           | `r ratio_of(c(1), list(discrete_data$time_signature))`  | 
-| $ts^-$ | Song has 1,3 or 5 beats.    | `r ratio_of(c(0), list(discrete_data$time_signature))`  |
+|  $TS$  |                             |                         $P(TS)$                         |
+| $ts^+$ |      Song has 4 beats.      | `r ratio_of(c(1), list(discrete_data$time_signature))`  |
+| $ts^-$ |  Song has 1,3 or 5 beats.   | `r ratio_of(c(0), list(discrete_data$time_signature))`  |
 |        |                             |                                                         |
-| $T$    |                             | $P(T)$                                                  |
-| $t^+$  | Song is fast.               | `r ratio_of(c(1), list(discrete_data$tempo))`           |
-| $t^-$  | Song is slow.               | `r ratio_of(c(0), list(discrete_data$tempo))`           |
+|  $T$   |                             |                         $P(T)$                          |
+| $t^+$  |        Song is fast.        |      `r ratio_of(c(1), list(discrete_data$tempo))`      |
+| $t^-$  |        Song is slow.        |      `r ratio_of(c(0), list(discrete_data$tempo))`      |
 
 ### Questions
 
@@ -180,15 +196,12 @@ $P(TS,M,E,L,V)$ (join probability)
 
 (*Child-Parent*)
 
-$P(TS=ts^+,M=m^+,E=e^+,L=l^+,V=v^+) =$
-$= P(TS=ts^+) * P(M=m^+) * P(E=e^+|M=m^+,TS=ts^+) * P(L=l^+|E=e^+) * P(V=v^+|E=e^+)$
-$= 0.9299862 * 0.5753109 * 0,1533858 * 0,2302526 * 0,1781433$
-$= 0,0033662$
+$P(TS=ts^+,M=m^+,E=e^+,L=l^+,V=v^+) =$ $= P(TS=ts^+) * P(M=m^+) * P(E=e^+|M=m^+,TS=ts^+) * P(L=l^+|E=e^+) * P(V=v^+|E=e^+)$ $= 0.9299862 * 0.5753109 * 0,1533858 * 0,2302526 * 0,1781433$ $= 0,0033662$
 
-a) $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 0.2866575 * 0.5350837 = 0,1533858$
+a)  $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 0.2866575 * 0.5350837 = 0,1533858$
 
-    | E     | M     | TS     | $P(E,M,TS)$                                                                                        |
-    |:-----:|:-----:|:------:|:--------------------------------------------------------------------------------------------------:|
+    |   E   |   M   |   TS   |                                            $P(E,M,TS)$                                             |
+    |:-------:|:-------:|:-------:|:---------------------------------------------:|
     | $e^+$ | $m^+$ | $ts^+$ | `r ratio_of(c(1,1,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
     | $e^+$ | $m^+$ | $ts^-$ | `r ratio_of(c(1,1,0), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
     | $e^+$ | $m^-$ | $ts^+$ | `r ratio_of(c(1,0,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
@@ -198,38 +211,48 @@ a) $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 0
     | $e^-$ | $m^-$ | $ts^+$ | `r ratio_of(c(0,0,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
     | $e^-$ | $m^-$ | $ts^-$ | `r ratio_of(c(0,0,0), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
 
-    | M     | TS     | $P(M,TS)$                                                                   |
-    |:-----:|:------:|:---------------------------------------------------------------------------:|
+    |   M   |   TS   |                                  $P(M,TS)$                                  |
+    |:---------:|:---------:|:-------------------------------------------------:|
     | $m^+$ | $ts^+$ | `r ratio_of(c(1,1), list(discrete_data$mode,discrete_data$time_signature))` |
     | $m^+$ | $ts^-$ | `r ratio_of(c(1,0), list(discrete_data$mode,discrete_data$time_signature))` |
     | $m^-$ | $ts^+$ | `r ratio_of(c(0,1), list(discrete_data$mode,discrete_data$time_signature))` |
     | $m^-$ | $ts^-$ | `r ratio_of(c(0,0), list(discrete_data$mode,discrete_data$time_signature))` |
 
-b) $P(L=l^+|E=e^+) = \frac{P(L=l^+,E=e^+)}{P(E=e^+)} = \frac{0.4294488}{0.5361585} = 0,2302526$
+b)  $P(L=l^+|E=e^+) = \frac{P(L=l^+,E=e^+)}{P(E=e^+)} = \frac{0.4294488}{0.5361585} = 0,2302526$
 
-    | L     | E     | $P(L,E)$                                                                |
-    |:-----:|:-----:|:-----------------------------------------------------------------------:|
+    |   L   |   E   |                                $P(L,E)$                                 |
+    |:---------:|:---------:|:-------------------------------------------------:|
     | $l^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$loudness,discrete_data$energy))` |
     | $l^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$loudness,discrete_data$energy))` |
     | $l^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$loudness,discrete_data$energy))` |
     | $l^-$ | $e^-$ | `r ratio_of(c(0,0), list(discrete_data$loudness,discrete_data$energy))` |
 
-c) $P(V=v^+|E=e^+) = \frac{P(V=v^+,E=e^+)}{P(E=e^+)} = \frac{0.3322586}{0.5361585} = 0,1781433$
+c)  $P(V=v^+|E=e^+) = \frac{P(V=v^+,E=e^+)}{P(E=e^+)} = \frac{0.3322586}{0.5361585} = 0,1781433$
 
-    | V     | E     | $P(V,E)$                                                                |
-    |:-----:|:-----:|:-----------------------------------------------------------------------:|
+    |   V   |   E   |                                $P(V,E)$                                |
+    |:---------:|:---------:|:-------------------------------------------------:|
     | $v^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$valence,discrete_data$energy))` |
     | $v^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$valence,discrete_data$energy))` |
     | $v^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$valence,discrete_data$energy))` |
     | $v^-$ | $e^-$ | `r ratio_of(c(0,0), list(discrete_data$valence,discrete_data$energy))` |
 
-#### 2. What is the likelihood that a song has 4 beats and is fast?
+#### 2. What is the likelihood that a song has 4 beats?
 
-$P(TS,T)$ (marginal probability)
+Marginal probability is supposed to express the probability of an event within one of the features occurring irregardless of the state of the other features. In other words, what is the likelihood of a state of a variable in isolation?
 
-$P(TS=ts^+,T=t^+)$
+This is already predefined
 
-TODO asi trochu upravit tuto otazku aj matematicku formulku 🏎️
+In this case we ask the question "What is the likelihood that a song has 4 beats?" or:
+
+$P(TS=ts^+)$ (marginal probability)
+
+$P(TS=ts^+) = 0.9299862$
+
+|        |                          |                                                        |
+|:-----------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|  $TS$  |                          |                        $P(TS)$                         |
+| $ts^+$ |    Song has 4 beats.     | `r ratio_of(c(1), list(discrete_data$time_signature))` |
+| $ts^-$ | Song has 1,3 or 5 beats. | `r ratio_of(c(0), list(discrete_data$time_signature))` |
 
 #### 3. If we know that a song is highly danceable and very energetic, what is the likelihood that it is happy?
 
@@ -237,29 +260,66 @@ $P(V|D,E)$ (conditional probability)
 
 $P(V=v^+|D=d^+,E=e^+)$
 
+$P(V=v^+|D=d^+,E=e^+) = \frac{P(V=v^+,D=d^+,E=e^+)}{P(D=d^+,E=e^+)} = \frac{0.2174113}{0.3003224} = 0.7239263$
+
+|   V   |   D   |   E   |                                             $P(V,D,E)$                                              |
+|:---------:|:---------:|:---------:|:--------------------------------------:|
+| $v^+$ | $d^+$ | $e^+$ | `r ratio_of(c(1,1,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^+$ | $d^+$ | $e^-$ | `r ratio_of(c(1,1,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^+$ | $d^-$ | $e^+$ | `r ratio_of(c(1,0,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^+$ | $d^-$ | $e^-$ | `r ratio_of(c(1,0,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^-$ | $d^+$ | $e^+$ | `r ratio_of(c(0,1,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^-$ | $d^+$ | $e^-$ | `r ratio_of(c(0,1,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^-$ | $d^-$ | $e^+$ | `r ratio_of(c(0,0,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+| $v^-$ | $d^-$ | $e^-$ | `r ratio_of(c(0,0,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
+
+|   D   |   E   |                                  $P(D,E)$                                   |
+|:-----------:|:-----------:|:--------------------------------------------:|
+| $d^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$danceability,discrete_data$energy))` |
+| $d^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$danceability,discrete_data$energy))` |
+| $d^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$danceability,discrete_data$energy))` |
+| $d^-$ | $e^-$ | `r ratio_of(c(0,0), list(discrete_data$danceability,discrete_data$energy))` |
+
 #### 4. If we know that a song has 4 beats and is fast, what is the likelihood that it is highly danceable?
 
 $P(D|TS,T)$ (conditional probability)
 
 $P(D=d^+|TS=ts^+,T=t^+)$
 
+|   D   |   TS   |   T   |                                                $P(V,D,E)$                                                 |
+|:---------:|:---------:|:---------:|:--------------------------------------:|
+| $d^+$ | $ts^+$ | $t^+$ | `r ratio_of(c(1,1,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^+$ | $ts^+$ | $t^-$ | `r ratio_of(c(1,1,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^+$ | $ts^-$ | $t^+$ | `r ratio_of(c(1,0,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^+$ | $ts^-$ | $t^-$ | `r ratio_of(c(1,0,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^-$ | $ts^+$ | $t^+$ | `r ratio_of(c(0,1,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^-$ | $ts^+$ | $t^-$ | `r ratio_of(c(0,1,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^-$ | $ts^-$ | $t^+$ | `r ratio_of(c(0,0,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+| $d^-$ | $ts^-$ | $t^-$ | `r ratio_of(c(0,0,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
+
+|   TS   |   T   |                                   $P(D,E)$                                   |
+|:-----------:|:-----------:|:--------------------------------------------:|
+| $ts^+$ | $t^+$ | `r ratio_of(c(1,1), list(discrete_data$time_signature,discrete_data$tempo))` |
+| $ts^+$ | $t^-$ | `r ratio_of(c(1,0), list(discrete_data$time_signature,discrete_data$tempo))` |
+| $ts^-$ | $t^+$ | `r ratio_of(c(0,1), list(discrete_data$time_signature,discrete_data$tempo))` |
+| $ts^-$ | $t^-$ | `r ratio_of(c(0,0), list(discrete_data$time_signature,discrete_data$tempo))` |
+
 #### 5. TODO
 
 $P(???)$ (? probability)
 
-$P(???)$ 
+$P(???)$
 
----
+------------------------------------------------------------------------
 
 ![](./images/bn_example_p11.png){width="50%"}
 
 +sformulujte ich pomocou matematického vyjadrenia (join probability, marginal probability, conditional probability).
 
- - minimálne jednu join probability pre konkrétnu kombináciu dát napr. P(A=a+, B=b-, C=c+, D=d-,…) 
- - minimálne jednu marginálnu pravdepodobnosť napr. P(A,B,E) ak …C=c+ a D=d-
- - minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+| B=b+,C=c-)
+-   minimálne jednu join probability pre konkrétnu kombináciu dát napr. P(A=a+, B=b-, C=c+, D=d-,…)
+-   minimálne jednu marginálnu pravdepodobnosť napr. P(A,B,E) ak …C=c+ a D=d-
+-   minimálne dve podmienenné pravdepodobnosti, ktoré musia zahŕňať podsieť s minimálne tromi na sebe závisiacimi javmi napr. P(A=a+\| B=b+,C=c-)
 
- minimalne 2 odpovede na otazky (z toho aspoň jednu podmienenú TODO)
- - ak sa rozhodnete použiť niektorú z knižníc na výpočet pravdepodobností na sieti (nemusíte), tak formálne úpravy treba realizovať ručne a až numerický výsledok je možné zveriť knižnici
- 
- Súčasťou projektu je výpis skriptu realizujúceho výpočet.
+minimalne 2 odpovede na otazky (z toho aspoň jednu podmienenú TODO) - ak sa rozhodnete použiť niektorú z knižníc na výpočet pravdepodobností na sieti (nemusíte), tak formálne úpravy treba realizovať ručne a až numerický výsledok je možné zveriť knižnici
+
+Súčasťou projektu je výpis skriptu realizujúceho výpočet.
