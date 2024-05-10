@@ -120,9 +120,9 @@ plot(network_structure)
 
 As we can see, we used the bnlearn library to help us with the network construction. The library gave us useful pointers to see which variable depends upon which other variables. Here's how we can interpret it:
 
--   The tempo of the song dictates how danceable the song is (danceability)
--   The mode of the song (major or minor) also inflences the danceability, but also determines the energy the song has.
--   The time-signature influences a lot of things - how danceable, lound and energetic the song is
+-   The tempo of the song dictates how danceable the song is (danceability).
+-   The mode of the song (major or minor) also influences the danceability, but also determines the energy the song has.
+-   The time-signature influences a lot of things - how danceable, loud and energetic the song is
 -   The danceability of the song is a good predictor of the valance of the song
 -   The overall energy of the song determines the valance and how loud it is
 -   And finally the valance (or in other words how lively the song is) dictates how loud it is.
