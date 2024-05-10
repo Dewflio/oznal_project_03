@@ -18,7 +18,7 @@ The dataset contains information about various "top" songs and their stats on Sp
 ### Data Description
 
 | Column name      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-|------------------------|-----------------------------------------------|
+|-------------------------|----------------------------------------------|
 | id               | The Spotify ID for the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | artist_names     | The name of the artist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | track_name       | The name of the track.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -122,9 +122,8 @@ As we can see, we used the bnlearn library to help us with the network construct
 
 -   The tempo of the song dictates how danceable the song is (danceability)
 
-```{=html}
 <!-- -->
-```
+
 -   The mode of the song (major or minor) also inflences the danceability, but also determines the energy the song has.
 
 -   The time-signature influences a lot of things - how danceable, lound and energetic the song is
@@ -157,7 +156,7 @@ ratio_of <- function(values, features) {
 ```
 
 |        |                             |                                                         |
-|:-------------:|:-----------------:|:-------------------------------------:|
+|:----------------:|:----------------:|:----------------------------------:|
 |  $D$   |                             |                         $P(D)$                          |
 | $d^+$  |  Song is highly danceable.  | `r ratio_of(c(1), list(f1=discrete_data$danceability))` |
 | $d^-$  | Song is not very danceable. | `r ratio_of(c(0), list(f1=discrete_data$danceability))` |
@@ -201,7 +200,7 @@ $P(TS=ts^+,M=m^+,E=e^+,L=l^+,V=v^+) =$ $= P(TS=ts^+) * P(M=m^+) * P(E=e^+|M=m^+,
 a)  $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 0.2866575 * 0.5350837 = 0,1533858$
 
     |   E   |   M   |   TS   |                                            $P(E,M,TS)$                                             |
-    |:-------:|:-------:|:-------:|:---------------------------------------------:|
+    |:------------:|:------------:|:------------:|:-----------------------------:|
     | $e^+$ | $m^+$ | $ts^+$ | `r ratio_of(c(1,1,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
     | $e^+$ | $m^+$ | $ts^-$ | `r ratio_of(c(1,1,0), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
     | $e^+$ | $m^-$ | $ts^+$ | `r ratio_of(c(1,0,1), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
@@ -212,7 +211,7 @@ a)  $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 
     | $e^-$ | $m^-$ | $ts^-$ | `r ratio_of(c(0,0,0), list(discrete_data$energy,discrete_data$mode,discrete_data$time_signature))` |
 
     |   M   |   TS   |                                  $P(M,TS)$                                  |
-    |:---------:|:---------:|:-------------------------------------------------:|
+    |:--------------:|:--------------:|:--------------------------------------:|
     | $m^+$ | $ts^+$ | `r ratio_of(c(1,1), list(discrete_data$mode,discrete_data$time_signature))` |
     | $m^+$ | $ts^-$ | `r ratio_of(c(1,0), list(discrete_data$mode,discrete_data$time_signature))` |
     | $m^-$ | $ts^+$ | `r ratio_of(c(0,1), list(discrete_data$mode,discrete_data$time_signature))` |
@@ -221,7 +220,7 @@ a)  $P(E=e^+|M=m^+,TS=ts^+) = \frac{P(E=e^+,M=m^+,TS=ts^+)}{P(M=m^+,TS=ts^+)} = 
 b)  $P(L=l^+|E=e^+) = \frac{P(L=l^+,E=e^+)}{P(E=e^+)} = \frac{0.4294488}{0.5361585} = 0,2302526$
 
     |   L   |   E   |                                $P(L,E)$                                 |
-    |:---------:|:---------:|:-------------------------------------------------:|
+    |:--------------:|:--------------:|:--------------------------------------:|
     | $l^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$loudness,discrete_data$energy))` |
     | $l^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$loudness,discrete_data$energy))` |
     | $l^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$loudness,discrete_data$energy))` |
@@ -230,7 +229,7 @@ b)  $P(L=l^+|E=e^+) = \frac{P(L=l^+,E=e^+)}{P(E=e^+)} = \frac{0.4294488}{0.53615
 c)  $P(V=v^+|E=e^+) = \frac{P(V=v^+,E=e^+)}{P(E=e^+)} = \frac{0.3322586}{0.5361585} = 0,1781433$
 
     |   V   |   E   |                                $P(V,E)$                                |
-    |:---------:|:---------:|:-------------------------------------------------:|
+    |:--------------:|:--------------:|:--------------------------------------:|
     | $v^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$valence,discrete_data$energy))` |
     | $v^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$valence,discrete_data$energy))` |
     | $v^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$valence,discrete_data$energy))` |
@@ -249,7 +248,7 @@ $P(TS=ts^+)$ (marginal probability)
 $P(TS=ts^+) = 0.9299862$
 
 |        |                          |                                                        |
-|:-----------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|:----------------:|:----------------:|:----------------------------------:|
 |  $TS$  |                          |                        $P(TS)$                         |
 | $ts^+$ |    Song has 4 beats.     | `r ratio_of(c(1), list(discrete_data$time_signature))` |
 | $ts^-$ | Song has 1,3 or 5 beats. | `r ratio_of(c(0), list(discrete_data$time_signature))` |
@@ -263,7 +262,7 @@ $P(V=v^+|D=d^+,E=e^+)$
 $P(V=v^+|D=d^+,E=e^+) = \frac{P(V=v^+,D=d^+,E=e^+)}{P(D=d^+,E=e^+)} = \frac{0.2174113}{0.3003224} = 0.7239263$
 
 |   V   |   D   |   E   |                                             $P(V,D,E)$                                              |
-|:---------:|:---------:|:---------:|:--------------------------------------:|
+|:-------------:|:-------------:|:-------------:|:---------------------------:|
 | $v^+$ | $d^+$ | $e^+$ | `r ratio_of(c(1,1,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
 | $v^+$ | $d^+$ | $e^-$ | `r ratio_of(c(1,1,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
 | $v^+$ | $d^-$ | $e^+$ | `r ratio_of(c(1,0,1), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
@@ -274,7 +273,7 @@ $P(V=v^+|D=d^+,E=e^+) = \frac{P(V=v^+,D=d^+,E=e^+)}{P(D=d^+,E=e^+)} = \frac{0.21
 | $v^-$ | $d^-$ | $e^-$ | `r ratio_of(c(0,0,0), list(discrete_data$valence,discrete_data$danceability,discrete_data$energy))` |
 
 |   D   |   E   |                                  $P(D,E)$                                   |
-|:-----------:|:-----------:|:--------------------------------------------:|
+|:---------------:|:---------------:|:-------------------------------------:|
 | $d^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$danceability,discrete_data$energy))` |
 | $d^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$danceability,discrete_data$energy))` |
 | $d^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$danceability,discrete_data$energy))` |
@@ -284,10 +283,10 @@ $P(V=v^+|D=d^+,E=e^+) = \frac{P(V=v^+,D=d^+,E=e^+)}{P(D=d^+,E=e^+)} = \frac{0.21
 
 $P(D|TS,T)$ (conditional probability)
 
-$P(D=d^+|TS=ts^+,T=t^+)$
+$P(D=d^+|TS=ts^+,T=t^+) = \frac{P(D=d^+,TS=ts^+,T=t^+)}{P(TS=ts^+,T=t^+)} = \frac{0.2335329}{0.4363581} = 0.5351863$
 
 |   D   |   TS   |   T   |                                                $P(V,D,E)$                                                 |
-|:---------:|:---------:|:---------:|:--------------------------------------:|
+|:-------------:|:-------------:|:-------------:|:---------------------------:|
 | $d^+$ | $ts^+$ | $t^+$ | `r ratio_of(c(1,1,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 | $d^+$ | $ts^+$ | $t^-$ | `r ratio_of(c(1,1,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 | $d^+$ | $ts^-$ | $t^+$ | `r ratio_of(c(1,0,1), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
@@ -298,17 +297,24 @@ $P(D=d^+|TS=ts^+,T=t^+)$
 | $d^-$ | $ts^-$ | $t^-$ | `r ratio_of(c(0,0,0), list(discrete_data$danceability,discrete_data$time_signature,discrete_data$tempo))` |
 
 |   TS   |   T   |                                   $P(D,E)$                                   |
-|:-----------:|:-----------:|:--------------------------------------------:|
+|:---------------:|:---------------:|:-------------------------------------:|
 | $ts^+$ | $t^+$ | `r ratio_of(c(1,1), list(discrete_data$time_signature,discrete_data$tempo))` |
 | $ts^+$ | $t^-$ | `r ratio_of(c(1,0), list(discrete_data$time_signature,discrete_data$tempo))` |
 | $ts^-$ | $t^+$ | `r ratio_of(c(0,1), list(discrete_data$time_signature,discrete_data$tempo))` |
 | $ts^-$ | $t^-$ | `r ratio_of(c(0,0), list(discrete_data$time_signature,discrete_data$tempo))` |
 
-#### 5. TODO
+#### 5. What is the probability that the song has high loudness while it has low energy and is in major mode?
 
-$P(???)$ (? probability)
+$P(L=l^+|E=e^-,M=m^+)$
 
-$P(???)$
+$P(L=l^+|E=e^-,M=m^+) = \frac{P(M=m^+).P(E=e^-|M=m^+).P(L=l^+|E=e^-)}{P(M=m^+).P(E=e^-|M=m^+)} = \frac{$P(L=l^+|E=e^-)}{1} = \frac{P(L=l^+,E=e^-)}{P(E=e^-)} = \frac{0.1325042}{0.4638415} = 0.2856669$
+
+|   L   |   E   |                                $P(L, E)$                                |
+|:---------------:|:---------------:|:-------------------------------------:|
+| $l^+$ | $e^+$ | `r ratio_of(c(1,1), list(discrete_data$loudness,discrete_data$energy))` |
+| $l^+$ | $e^-$ | `r ratio_of(c(1,0), list(discrete_data$loudness,discrete_data$energy))` |
+| $l^-$ | $e^+$ | `r ratio_of(c(0,1), list(discrete_data$loudness,discrete_data$energy))` |
+| $l^-$ | $e^-$ | `r ratio_of(c(0,0), list(discrete_data$loudness,discrete_data$energy))` |
 
 ------------------------------------------------------------------------
 
